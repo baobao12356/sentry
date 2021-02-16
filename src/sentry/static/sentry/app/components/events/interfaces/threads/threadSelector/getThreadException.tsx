@@ -4,8 +4,8 @@ import {Thread} from 'app/types/events';
 import {defined} from 'app/utils';
 
 function getThreadException(
-  thread: Thread,
-  event: Event
+  event: Event,
+  thread?: Thread
 ): Required<ExceptionType> | undefined {
   const exceptionEntry = event.entries.find(entry => entry.type === 'exception');
 
@@ -25,6 +25,10 @@ function getThreadException(
       return undefined;
     }
     return exceptionData as Required<ExceptionType>;
+  }
+
+  if (!thread) {
+    return undefined;
   }
 
   for (const exc of exceptionDataValues) {

@@ -14,7 +14,7 @@ type NotifyOptions = {
 };
 
 type Props = {
-  stackView: STACK_VIEW;
+  stackView?: STACK_VIEW;
   stackType?: STACK_TYPE;
   platform?: string;
   stacktrace?: ExceptionValue['stacktrace'];
@@ -41,34 +41,9 @@ const CrashActions = ({
     ? false
     : !!exception?.values.find(x => x.rawStacktrace) || !!thread?.rawStacktrace;
 
-  const notify = (options: NotifyOptions) => {
-    if (onChange) {
-      onChange(options);
-    }
-  };
-
-  const setStackType = (type: STACK_TYPE) => () => {
-    notify({stackType: type});
-  };
-
-  const setStackView = (view: STACK_VIEW) => () => {
-    notify({stackView: view});
-  };
-
-  const getOriginalButtonLabel = () => {
-    if (platform === 'javascript' || platform === 'node') {
-      return t('Original');
-    }
-
-    return t('Symbolicated');
-  };
-
-  const getMinifiedButtonLabel = () => {
-    if (platform === 'javascript' || platform === 'node') {
-      return t('Minified');
-    }
-    return t('Unsymbolicated');
-  };
+  function notify(options: NotifyOptions) {
+    onChange?.(options);
+  }
 
   return (
     <ButtonGroupWrapper>
@@ -77,7 +52,7 @@ const CrashActions = ({
           <Button
             barId={STACK_VIEW.APP}
             size="xsmall"
-            onClick={setStackView(STACK_VIEW.APP)}
+            onClick={() => notify({stackView: STACK_VIEW.APP})}
           >
             {t('App Only')}
           </Button>
@@ -85,13 +60,13 @@ const CrashActions = ({
         <Button
           barId={STACK_VIEW.FULL}
           size="xsmall"
-          onClick={setStackView(STACK_VIEW.FULL)}
+          onClick={() => notify({stackView: STACK_VIEW.FULL})}
         >
           {t('Full')}
         </Button>
         <Button
           barId={STACK_VIEW.RAW}
-          onClick={setStackView(STACK_VIEW.RAW)}
+          onClick={() => notify({stackView: STACK_VIEW.RAW})}
           size="xsmall"
         >
           {t('Raw')}
@@ -102,16 +77,20 @@ const CrashActions = ({
           <Button
             barId={STACK_TYPE.ORIGINAL}
             size="xsmall"
-            onClick={setStackType(STACK_TYPE.ORIGINAL)}
+            onClick={() => notify({stackType: STACK_TYPE.ORIGINAL})}
           >
-            {getOriginalButtonLabel()}
+            {platform === 'javascript' || platform === 'node'
+              ? t('Original')
+              : t('Symbolicated')}
           </Button>
           <Button
             barId={STACK_TYPE.MINIFIED}
             size="xsmall"
-            onClick={setStackType(STACK_TYPE.MINIFIED)}
+            onClick={() => notify({stackType: STACK_TYPE.MINIFIED})}
           >
-            {getMinifiedButtonLabel()}
+            {platform === 'javascript' || platform === 'node'
+              ? t('Minified')
+              : t('Unsymbolicated')}
           </Button>
         </ButtonBar>
       )}

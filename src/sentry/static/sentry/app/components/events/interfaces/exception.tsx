@@ -9,6 +9,11 @@ import {t} from 'app/locale';
 import {ExceptionType} from 'app/types';
 import {Event} from 'app/types/event';
 import {STACK_TYPE, STACK_VIEW} from 'app/types/stacktrace';
+import {defined} from 'app/utils';
+
+import findBestThread from './threads/threadSelector/findBestThread';
+import getThreadException from './threads/threadSelector/getThreadException';
+import getThreadStacktrace from './threads/threadSelector/getThreadStacktrace';
 
 const defaultProps = {
   hideGuide: false,
@@ -28,9 +33,7 @@ type State = {
 };
 
 class Exception extends React.Component<Props, State> {
-  static defaultProps = {
-    hideGuide: false,
-  };
+  static defaultProps = defaultProps;
 
   state: State = {
     stackView: this.props.data.hasSystemFrames ? STACK_VIEW.APP : STACK_VIEW.FULL,
@@ -46,18 +49,24 @@ class Exception extends React.Component<Props, State> {
   };
 
   render() {
-    const eventHasThreads = !!this.props.event.entries.find(
-      entry => entry.type === 'threads'
-    );
+    const {event, projectId, data, hideGuide, type} = this.props;
+    const {entries} = event;
+    const threadEntry = entries.find(entry => entry.type === 'threads');
 
-    // in case there are threads in the event data, we don't render the
-    // exception block.  Instead the exception is contained within the
-    // thread interface.
-    if (eventHasThreads) {
-      return null;
+    if (threadEntry) {
+      const threads = threadEntry.data.values;
+      const bestThread = defined(threads) ? findBestThread(threads) : undefined;
+      const threadException = getThreadException(event, bestThread);
+      const threadStacktrace = getThreadStacktrace(event, false, bestThread);
+      const hasMissingStacktrace = !(threadException || threadStacktrace);
+
+      // In case there are threads in the event data and there is no missing stacktrace, we don't render the
+      // exception block.  Instead the exception is contained within the thread interface.
+      if (!hasMissingStacktrace) {
+        return null;
+      }
     }
 
-    const {projectId, event, data, hideGuide, type} = this.props;
     const {stackView, stackType, newestFirst} = this.state;
 
     const commonCrashHeaderProps = {
