@@ -60,8 +60,8 @@ class Exception extends React.Component<Props, State> {
       const threadStacktrace = getThreadStacktrace(event, false, bestThread);
       const hasMissingStacktrace = !(threadException || threadStacktrace);
 
-      // In case there are threads in the event data and there is no missing stacktrace, we don't render the
-      // exception block.  Instead the exception is contained within the thread interface.
+      // In case there are threads in the event data and if there is a threadException or a threadStacktrace, we don't render the
+      // exception block. Instead the exception is contained within the thread interface.
       if (!hasMissingStacktrace) {
         return null;
       }

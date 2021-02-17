@@ -102,7 +102,6 @@ class Threads extends React.Component<Props, State> {
 
     const hasMissingStacktrace = !(exception || stacktrace);
     const hasMoreThanOneThread = threads.length > 1;
-    const thread = hasMoreThanOneThread ? activeThread : undefined;
 
     return (
       <EventDataSection
@@ -141,7 +140,7 @@ class Threads extends React.Component<Props, State> {
               platform={event.platform}
               stacktrace={stacktrace}
               stackType={stackType}
-              thread={thread}
+              thread={hasMoreThanOneThread ? activeThread : undefined}
               exception={exception}
               onChange={this.handleChangeStackView}
             />
